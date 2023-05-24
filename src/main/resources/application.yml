@@ -1,0 +1,37 @@
+spring:
+
+jasypt:
+  test-str: 123456
+  encryptor:
+    password: data-transfer
+
+dataSources:
+  ocean-base-dev:
+    type: oceanbase
+    url: 127.0.0.1:2883
+    scheme: OB_TEST
+    user: OB_TEST@wwftest#obdemo
+    password: ENC(***)
+  baas-db-test:
+    type: mysql
+    url: 127.0.0.1:3006
+    scheme: MS_TEST
+    user: customer
+    password: ENC(***)
+
+tasks:
+  - id: ocean-base-dev-transfer-task
+    timer: >-
+      0/30 * * * * ?
+    db: ocean-base-dev
+    proc:
+      - db: baas-db-test
+        type: transfer
+        sql: >-
+          SELECT id dev_Id, Name dev_Name
+          FROM chain
+        targetTable: t_chain
+      - db: ocean-base-dev
+        type: any
+        sql: >-
+          select *  from T_USER_CENTER WHERE rownum < 100;
